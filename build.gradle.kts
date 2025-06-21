@@ -8,7 +8,11 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17 // Declare java version.
+    sourceCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+        vendor.set(JvmVendorSpec.GRAAL_VM)
+    }
 }
 
 group = "uk.hotten.staffog" // Declare bundle identifier.
