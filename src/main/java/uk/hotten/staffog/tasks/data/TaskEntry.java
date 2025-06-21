@@ -5,8 +5,15 @@ import lombok.Setter;
 
 public class TaskEntry {
 
-	@Getter @Setter private int id;
-	@Getter @Setter private String task;
-	@Getter @Setter private String data;
+    @Getter
+    @Setter
+    private int id;
 
+    @Getter
+    @Setter
+    private String task;
+
+    @Getter
+    @Setter
+    private String data;
 }

@@ -5,15 +5,18 @@ import uk.hotten.staffog.punish.data.PunishType;
 
 public class UnpunishTask {
 
-	@Getter private PunishType type;
-	@Getter private int id;
-	@Getter private String name;
+    @Getter
+    private PunishType type;
 
-	public UnpunishTask(String type, int id) {
+    @Getter
+    private int id;
 
-		this.type = PunishType.valueOf(type);
-		this.id = id;
+    @Getter
+    private String name;
 
-	}
+    public UnpunishTask(String type, int id) {
 
+        this.type = PunishType.valueOf(type);
+        this.id = id;
+    }
 }

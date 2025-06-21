@@ -4,22 +4,18 @@ import org.bukkit.Bukkit;
 
 public class Console {
 
-	public static void info(String message) {
+    public static void info(String message) {
 
-		Bukkit.getServer().getConsoleSender().sendMessage("[Staff-OG] " + message);
+        Bukkit.getServer().getConsoleSender().sendMessage("[Staff-OG] " + message);
+    }
 
-	}
+    public static void warn(String message) {
 
-	public static void warn(String message) {
+        Bukkit.getServer().getConsoleSender().sendMessage("[Staff-OG: WARNING] " + message);
+    }
 
-		Bukkit.getServer().getConsoleSender().sendMessage("[Staff-OG: WARNING] " + message);
+    public static void error(String message) {
 
-	}
-
-	public static void error(String message) {
-
-		Bukkit.getServer().getConsoleSender().sendMessage("[Staff-OG: ERROR] " + message);
-
-	}
-
+        Bukkit.getServer().getConsoleSender().sendMessage("[Staff-OG: ERROR] " + message);
+    }
 }

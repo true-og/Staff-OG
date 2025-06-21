@@ -10,41 +10,37 @@ import uk.hotten.staffog.StaffOGPlugin;
 
 public class DataEventListener implements Listener {
 
-	@EventHandler
-	public void onJoin(PlayerJoinEvent event) {
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
 
-		updatePlayerCounts();
+        updatePlayerCounts();
+    }
 
-	}
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
 
-	@EventHandler
-	public void onQuit(PlayerQuitEvent event) {
+        Bukkit.getServer().getScheduler().runTaskLater(DatabaseManager.getPlugin(), this::updatePlayerCounts, 10);
+    }
 
-		Bukkit.getServer().getScheduler().runTaskLater(DatabaseManager.getPlugin(), this::updatePlayerCounts, 10);
+    private void updatePlayerCounts() {
 
-	}
+        DatabaseManager dbm = DatabaseManager.getInstance();
 
-	private void updatePlayerCounts() {
+        // All players
+        dbm.setStatEntry(
+                "player_count",
+                String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
 
-		DatabaseManager dbm = DatabaseManager.getInstance();
+        // Staff
+        int amount = 0;
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
-		// All players
-		dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
+            if (StaffOGPlugin.getVaultPerms().has(p, "staffog.isstaff")) {
 
-		// Staff
-		int amount = 0;
-		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                amount++;
+            }
+        }
 
-			if (StaffOGPlugin.getVaultPerms().has(p, "staffog.isstaff")) {
-
-				amount++;
-
-			}
-
-		}
-
-		dbm.setStatEntry("staff_count", String.valueOf(amount));
-
-	}
-
+        dbm.setStatEntry("staff_count", String.valueOf(amount));
+    }
 }

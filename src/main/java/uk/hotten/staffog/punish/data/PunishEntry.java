@@ -2,92 +2,119 @@ package uk.hotten.staffog.punish.data;
 
 import java.util.Date;
 import java.util.UUID;
-
-import org.bukkit.entity.Player;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.entity.Player;
 import uk.hotten.staffog.utils.TimeUtils;
 
 public class PunishEntry {
 
-	// None DB data
-	@Getter @Setter private PunishType type;
-	@Getter @Setter private Player player;
-	@Getter @Setter private String name;
+    // None DB data
+    @Getter
+    @Setter
+    private PunishType type;
 
-	// Data stored in DB
-	@Getter @Setter private long id;
-	@Getter @Setter private UUID uuid;
-	@Getter @Setter private String reason;
+    @Getter
+    @Setter
+    private Player player;
 
-	@Getter @Setter private String byUuid;
-	@Getter @Setter private String byName;
+    @Getter
+    @Setter
+    private String name;
 
-	@Getter @Setter private String removedUuid;
-	@Getter @Setter private String removedName;
-	@Getter @Setter private String removedReason;
-	@Getter @Setter private long removedTime;
+    // Data stored in DB
+    @Getter
+    @Setter
+    private long id;
 
-	@Getter @Setter private long time;
-	@Getter @Setter private long until;
+    @Getter
+    @Setter
+    private UUID uuid;
 
-	@Getter @Setter private boolean active;
+    @Getter
+    @Setter
+    private String reason;
 
-	public PunishEntry(PunishType type) {
+    @Getter
+    @Setter
+    private String byUuid;
 
-		this.type = type;
+    @Getter
+    @Setter
+    private String byName;
 
-	}
+    @Getter
+    @Setter
+    private String removedUuid;
 
-	public long calculateDuration() {
+    @Getter
+    @Setter
+    private String removedName;
 
-		if (until == -1) {
+    @Getter
+    @Setter
+    private String removedReason;
 
-			return -1;
+    @Getter
+    @Setter
+    private long removedTime;
 
-		}
+    @Getter
+    @Setter
+    private long time;
 
-		return until - time;
+    @Getter
+    @Setter
+    private long until;
 
-	}
+    @Getter
+    @Setter
+    private boolean active;
 
-	public long calculateRemaining() {
+    public PunishEntry(PunishType type) {
 
-		if (until == -1) {
+        this.type = type;
+    }
 
-			return -1;
+    public long calculateDuration() {
 
-		}
+        if (until == -1) {
 
-		return until - System.currentTimeMillis();
+            return -1;
+        }
 
-	}
+        return until - time;
+    }
 
-	public boolean checkDurationOver() {
+    public long calculateRemaining() {
 
-		if (until == -1) {
+        if (until == -1) {
 
-			return false;
+            return -1;
+        }
 
-		}
+        return until - System.currentTimeMillis();
+    }
 
-		return (calculateRemaining() <= 0);
+    public boolean checkDurationOver() {
 
-	}
+        if (until == -1) {
 
-	public String calculateUntilDate() {
+            return false;
+        }
 
-		if (until == -1) {
+        return (calculateRemaining() <= 0);
+    }
 
-			return "forever";
+    public String calculateUntilDate() {
 
-		}
+        if (until == -1) {
 
-		Date date = new Date(until);
+            return "forever";
+        }
 
-		return TimeUtils.notificationTimeFormat.format(date);
+        Date date = new Date(until);
 
-	}
-
+        return TimeUtils.notificationTimeFormat.format(date);
+    }
 }

@@ -1,16 +1,13 @@
 package uk.hotten.staffog.tasks;
 
+import com.google.gson.Gson;
 import java.sql.Connection;
 import java.util.ArrayList;
-
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
-
-import com.google.gson.Gson;
-
-import lombok.Getter;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.data.jooq.Tables;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogTaskRecord;
@@ -24,127 +21,122 @@ import uk.hotten.staffog.utils.Message;
 
 public class TaskManager {
 
-	@Getter private JavaPlugin plugin;
+    @Getter
+    private JavaPlugin plugin;
 
-	public TaskManager(JavaPlugin plugin) {
+    public TaskManager(JavaPlugin plugin) {
 
-		this.plugin = plugin;
+        this.plugin = plugin;
 
-		plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
-			for (TaskEntry entry : checkForTasks()) {
-				switch (entry.getTask()) {
-				case "unpunish": {
-					processUnpunish(entry);
-					deleteTask(entry.getId());
-					break;
-				}
-				case "newreport": {
-					processNewReport(entry);
-					deleteTask(entry.getId());
-				}
-				case "newappeal": {
-					processNewAppeal(entry);
-					deleteTask(entry.getId());
-				}
-				}
-			}
-		}, 0, 200);
+        plugin.getServer()
+                .getScheduler()
+                .runTaskTimerAsynchronously(
+                        plugin,
+                        () -> {
+                            for (TaskEntry entry : checkForTasks()) {
+                                switch (entry.getTask()) {
+                                    case "unpunish": {
+                                        processUnpunish(entry);
+                                        deleteTask(entry.getId());
+                                        break;
+                                    }
+                                    case "newreport": {
+                                        processNewReport(entry);
+                                        deleteTask(entry.getId());
+                                    }
+                                    case "newappeal": {
+                                        processNewAppeal(entry);
+                                        deleteTask(entry.getId());
+                                    }
+                                }
+                            }
+                        },
+                        0,
+                        200);
+    }
 
-	}
+    private ArrayList<TaskEntry> checkForTasks() {
 
-	private ArrayList<TaskEntry> checkForTasks() {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+            ArrayList<TaskEntry> toReturn = new ArrayList<>();
 
-			ArrayList<TaskEntry> toReturn = new ArrayList<>();
+            DSLContext dsl = DSL.using(connection);
+            Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk())
+                    .from(Tables.STAFFOG_TASK)
+                    .fetchInto(Tables.STAFFOG_TASK);
 
-			DSLContext dsl = DSL.using(connection);
-			Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk())
-					.from(Tables.STAFFOG_TASK)
-					.fetchInto(Tables.STAFFOG_TASK);
+            for (StaffogTaskRecord record : result) {
+                TaskEntry entry = new TaskEntry();
+                entry.setId(record.getId());
+                entry.setTask(record.getTask());
+                entry.setData(record.getData());
+                toReturn.add(entry);
+            }
 
-			for (StaffogTaskRecord record : result) {
-				TaskEntry entry = new TaskEntry();
-				entry.setId(record.getId());
-				entry.setTask(record.getTask());
-				entry.setData(record.getData());
-				toReturn.add(entry);
-			}
+            return toReturn;
 
-			return toReturn;
+        } catch (Exception error) {
 
-		}
-		catch (Exception error) {
+            error.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 
-			error.printStackTrace();
-			return new ArrayList<>();
+    private void processUnpunish(TaskEntry entry) {
 
-		}
+        if (!entry.getTask().equals("unpunish")) {
 
-	}
+            return;
+        }
 
-	private void processUnpunish(TaskEntry entry) {
+        Gson gson = new Gson();
+        UnpunishTask task = gson.fromJson(entry.getData(), UnpunishTask.class);
+        PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
 
-		if (! entry.getTask().equals("unpunish")) {
+        PunishManager.getInstance().visualRemovePunishment(punishEntry);
+    }
 
-			return;
+    private void processNewReport(TaskEntry entry) {
 
-		}
+        if (!entry.getTask().equals("newreport")) {
 
-		Gson gson = new Gson();
-		UnpunishTask task = gson.fromJson(entry.getData(), UnpunishTask.class);
-		PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
+            return;
+        }
 
-		PunishManager.getInstance().visualRemovePunishment(punishEntry);
+        Gson gson = new Gson();
+        NewReportTask task = gson.fromJson(entry.getData(), NewReportTask.class);
 
-	}
+        Message.staffBroadcast(Message.formatNotification(
+                "REPORT",
+                "New " + task.getType() + " report #" + task.getId() + " by " + task.getBy() + " against "
+                        + task.getOffender()));
+    }
 
-	private void processNewReport(TaskEntry entry) {
+    private void processNewAppeal(TaskEntry entry) {
 
-		if (! entry.getTask().equals("newreport")) {
+        if (!entry.getTask().equals("newappeal")) {
 
-			return;
+            return;
+        }
 
-		}
+        Gson gson = new Gson();
+        NewAppealTask task = gson.fromJson(entry.getData(), NewAppealTask.class);
 
-		Gson gson = new Gson();
-		NewReportTask task = gson.fromJson(entry.getData(), NewReportTask.class);
+        Message.staffBroadcast(Message.formatNotification(
+                "APPEAL", "New " + task.getType().toLowerCase() + " appeal #" + task.getId() + " by " + task.getBy()));
+    }
 
-		Message.staffBroadcast(Message.formatNotification("REPORT", "New " + task.getType() + " report #" + task.getId() + " by " + task.getBy() + " against " + task.getOffender()));
+    private void deleteTask(int id) {
 
-	}
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-	private void processNewAppeal(TaskEntry entry) {
+            DSLContext dsl = DSL.using(connection);
+            dsl.delete(Tables.STAFFOG_TASK).where(Tables.STAFFOG_TASK.ID.eq(id)).execute();
 
-		if (! entry.getTask().equals("newappeal")) {
+        } catch (Exception error) {
 
-			return;
-
-		}
-
-		Gson gson = new Gson();
-		NewAppealTask task = gson.fromJson(entry.getData(), NewAppealTask.class);
-
-		Message.staffBroadcast(Message.formatNotification("APPEAL", "New " + task.getType().toLowerCase() + " appeal #" + task.getId() + " by " + task.getBy()));
-
-	}
-
-	private void deleteTask(int id) {
-
-		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-
-			DSLContext dsl = DSL.using(connection);
-			dsl.delete(Tables.STAFFOG_TASK)
-			.where(Tables.STAFFOG_TASK.ID.eq(id))
-			.execute();
-
-		}
-		catch (Exception error) {
-
-			error.printStackTrace();
-
-		}
-
-	}
-
+            error.printStackTrace();
+        }
+    }
 }
