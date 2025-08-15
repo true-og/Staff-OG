@@ -31,14 +31,9 @@ public class StaffIPInfo {
     @Setter
     private boolean gameVerified;
 
-    public StaffIPInfo(
-            int id,
-            UUID uuid,
-            String ip,
-            boolean initial,
-            boolean panelAcknowledged,
-            boolean panelVerified,
-            boolean gameVerified) {
+    public StaffIPInfo(int id, UUID uuid, String ip, boolean initial, boolean panelAcknowledged, boolean panelVerified,
+            boolean gameVerified)
+    {
 
         this.id = id;
         this.uuid = uuid;
@@ -47,6 +42,7 @@ public class StaffIPInfo {
         this.panelAcknowledged = panelAcknowledged;
         this.panelVerified = panelVerified;
         this.gameVerified = gameVerified;
+
     }
 
     public StaffIPInfo(int id, UUID uuid, String ip) {
@@ -57,5 +53,7 @@ public class StaffIPInfo {
         this.initial = false;
         this.panelVerified = false;
         this.gameVerified = false;
+
     }
+
 }

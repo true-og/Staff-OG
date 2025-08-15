@@ -28,31 +28,38 @@ public class TaskManager {
 
         this.plugin = plugin;
 
-        plugin.getServer()
-                .getScheduler()
-                .runTaskTimerAsynchronously(
-                        plugin,
-                        () -> {
-                            for (TaskEntry entry : checkForTasks()) {
-                                switch (entry.getTask()) {
-                                    case "unpunish": {
-                                        processUnpunish(entry);
-                                        deleteTask(entry.getId());
-                                        break;
-                                    }
-                                    case "newreport": {
-                                        processNewReport(entry);
-                                        deleteTask(entry.getId());
-                                    }
-                                    case "newappeal": {
-                                        processNewAppeal(entry);
-                                        deleteTask(entry.getId());
-                                    }
-                                }
-                            }
-                        },
-                        0,
-                        200);
+        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+
+            for (TaskEntry entry : checkForTasks()) {
+
+                switch (entry.getTask()) {
+
+                    case "unpunish": {
+
+                        processUnpunish(entry);
+                        deleteTask(entry.getId());
+                        break;
+
+                    }
+                    case "newreport": {
+
+                        processNewReport(entry);
+                        deleteTask(entry.getId());
+
+                    }
+                    case "newappeal": {
+
+                        processNewAppeal(entry);
+                        deleteTask(entry.getId());
+
+                    }
+
+                }
+
+            }
+
+        }, 0, 200);
+
     }
 
     private ArrayList<TaskEntry> checkForTasks() {
@@ -62,16 +69,17 @@ public class TaskManager {
             ArrayList<TaskEntry> toReturn = new ArrayList<>();
 
             DSLContext dsl = DSL.using(connection);
-            Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk())
-                    .from(Tables.STAFFOG_TASK)
+            Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk()).from(Tables.STAFFOG_TASK)
                     .fetchInto(Tables.STAFFOG_TASK);
 
             for (StaffogTaskRecord record : result) {
+
                 TaskEntry entry = new TaskEntry();
                 entry.setId(record.getId());
                 entry.setTask(record.getTask());
                 entry.setData(record.getData());
                 toReturn.add(entry);
+
             }
 
             return toReturn;
@@ -80,7 +88,9 @@ public class TaskManager {
 
             error.printStackTrace();
             return new ArrayList<>();
+
         }
+
     }
 
     private void processUnpunish(TaskEntry entry) {
@@ -88,6 +98,7 @@ public class TaskManager {
         if (!entry.getTask().equals("unpunish")) {
 
             return;
+
         }
 
         Gson gson = new Gson();
@@ -95,6 +106,7 @@ public class TaskManager {
         PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
 
         PunishManager.getInstance().visualRemovePunishment(punishEntry);
+
     }
 
     private void processNewReport(TaskEntry entry) {
@@ -102,15 +114,15 @@ public class TaskManager {
         if (!entry.getTask().equals("newreport")) {
 
             return;
+
         }
 
         Gson gson = new Gson();
         NewReportTask task = gson.fromJson(entry.getData(), NewReportTask.class);
 
-        Message.staffBroadcast(Message.formatNotification(
-                "REPORT",
-                "New " + task.getType() + " report #" + task.getId() + " by " + task.getBy() + " against "
-                        + task.getOffender()));
+        Message.staffBroadcast(Message.formatNotification("REPORT", "New " + task.getType() + " report #" + task.getId()
+                + " by " + task.getBy() + " against " + task.getOffender()));
+
     }
 
     private void processNewAppeal(TaskEntry entry) {
@@ -118,13 +130,15 @@ public class TaskManager {
         if (!entry.getTask().equals("newappeal")) {
 
             return;
+
         }
 
         Gson gson = new Gson();
         NewAppealTask task = gson.fromJson(entry.getData(), NewAppealTask.class);
 
-        Message.staffBroadcast(Message.formatNotification(
-                "APPEAL", "New " + task.getType().toLowerCase() + " appeal #" + task.getId() + " by " + task.getBy()));
+        Message.staffBroadcast(Message.formatNotification("APPEAL",
+                "New " + task.getType().toLowerCase() + " appeal #" + task.getId() + " by " + task.getBy()));
+
     }
 
     private void deleteTask(int id) {
@@ -137,6 +151,9 @@ public class TaskManager {
         } catch (Exception error) {
 
             error.printStackTrace();
+
         }
+
     }
+
 }

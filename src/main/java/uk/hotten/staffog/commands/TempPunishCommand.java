@@ -24,9 +24,10 @@ public class TempPunishCommand implements CommandExecutor {
 
         if (args == null || args.length < 4) {
 
-            Message.staffOGMessage(
-                    (Player) sender, ("&6Correct Usage: &e/" + label + " <player> <unit> <amount> <reason>"));
+            Message.staffOGMessage((Player) sender,
+                    ("&6Correct Usage: &e/" + label + " <player> <unit> <amount> <reason>"));
             return true;
+
         }
 
         int amount;
@@ -38,37 +39,49 @@ public class TempPunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&cERROR: The amount of units must be a number!"));
             return true;
+
         }
 
         Date currentTime = new Date(System.currentTimeMillis());
         long untilTime;
         switch (args[1].toLowerCase()) {
+
             case "d": {
+
                 untilTime = DateUtils.addDays(currentTime, amount).getTime();
                 break;
+
             }
 
             case "w": {
+
                 untilTime = DateUtils.addWeeks(currentTime, amount).getTime();
                 break;
+
             }
 
             case "m": {
+
                 untilTime = DateUtils.addMonths(currentTime, amount).getTime();
                 break;
+
             }
 
             case "y": {
+
                 untilTime = DateUtils.addYears(currentTime, amount).getTime();
                 break;
+
             }
 
             default: {
-                Message.staffOGMessage(
-                        (Player) sender,
+
+                Message.staffOGMessage((Player) sender,
                         ("&cERROR: Invalid time unit. &6Please supply: &e(d)ay, (w)eek, (m)onth or (y)ear&6."));
                 return true;
+
             }
+
         }
 
         PunishType commandType;
@@ -84,6 +97,7 @@ public class TempPunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&cERROR: Unsupported type for command."));
             return true;
+
         }
 
         UUID uuid = PunishManager.getInstance().getUUIDFromName(args[0]);
@@ -91,17 +105,16 @@ public class TempPunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&c" + args[0] + " has never joined the server!"));
             return true;
+
         }
 
         PunishEntry isPunished = PunishManager.getInstance().checkActivePunishment(commandType, uuid);
         if (isPunished != null) {
 
-            Message.staffOGMessage(
-                    (Player) sender,
-                    ("&c" + args[0] + " is already " + commandType.getBroadcastMessage() + " for "
-                                    + TimeUtils.formatMillisecondTime(isPunished.calculateRemaining()))
-                            + ".");
+            Message.staffOGMessage((Player) sender, ("&c" + args[0] + " is already " + commandType.getBroadcastMessage()
+                    + " for " + TimeUtils.formatMillisecondTime(isPunished.calculateRemaining())) + ".");
             return true;
+
         }
 
         OfflinePlayer player = Bukkit.getServer().getOfflinePlayer(uuid);
@@ -113,9 +126,10 @@ public class TempPunishCommand implements CommandExecutor {
         if (player.isOnline()) {
 
             entry.setPlayer(player.getPlayer());
+
         }
-        entry.setByUuid(
-                (sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
+
+        entry.setByUuid((sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
         entry.setByName((sender instanceof Player) ? ((Player) sender).getName() : "NCP");
         entry.setTime(currentTime.getTime());
         entry.setUntil(untilTime);
@@ -130,10 +144,10 @@ public class TempPunishCommand implements CommandExecutor {
 
         PunishManager.getInstance().newPunishment(entry);
 
-        Message.staffOGMessage(
-                (Player) sender,
-                ("&7" + "You have " + commandType.getBroadcastMessage() + " " + entry.getName() + " for "
-                        + TimeUtils.formatMillisecondTime(entry.calculateDuration()) + "."));
+        Message.staffOGMessage((Player) sender, ("&7" + "You have " + commandType.getBroadcastMessage() + " "
+                + entry.getName() + " for " + TimeUtils.formatMillisecondTime(entry.calculateDuration()) + "."));
         return true;
+
     }
+
 }

@@ -23,5 +23,7 @@ public class ChatReportEntry {
         this.name = name;
         this.message = message;
         this.time = time;
+
     }
+
 }

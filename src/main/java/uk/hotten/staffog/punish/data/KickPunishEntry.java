@@ -39,4 +39,5 @@ public class KickPunishEntry {
     @Getter
     @Setter
     private long time;
+
 }

@@ -16,4 +16,5 @@ public class NewAppealTask {
     @Getter
     @Setter
     private String type;
+
 }

@@ -20,6 +20,7 @@ public class KickCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, "&6Correct Usage: &e/kick <player> [reason]");
             return true;
+
         }
 
         Player toKick = Bukkit.getServer().getPlayer(args[0]);
@@ -27,28 +28,34 @@ public class KickCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&c" + args[0] + " is not online!"));
             return true;
+
         }
 
         KickPunishEntry entry = new KickPunishEntry();
         entry.setUuid(toKick.getUniqueId());
         entry.setName(toKick.getName());
         entry.setPlayer(toKick);
-        entry.setByUuid(
-                (sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
+        entry.setByUuid((sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
         entry.setByName((sender instanceof Player) ? ((Player) sender).getName() : "NCP");
         entry.setTime(System.currentTimeMillis());
 
         if (args.length >= 2) {
+
             ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
             preReason.remove(0);
             String reason = String.join(" ", preReason);
             entry.setReason(reason);
+
         } else {
+
             entry.setReason("No reason specified");
+
         }
 
         PunishManager.getInstance().newKickPunishment(entry);
         Message.staffOGMessage((Player) sender, ("&7" + "You have kicked " + entry.getName() + "."));
         return true;
+
     }
+
 }

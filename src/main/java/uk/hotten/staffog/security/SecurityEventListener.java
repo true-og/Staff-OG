@@ -22,6 +22,7 @@ public class SecurityEventListener implements Listener {
         if (!StaffOGPlugin.getVaultPerms().playerHas("world", Bukkit.getOfflinePlayer(uuid), "staffog.panelaccess")) {
 
             return;
+
         }
 
         String ip = event.getAddress().getHostAddress();
@@ -31,14 +32,15 @@ public class SecurityEventListener implements Listener {
             StaffIPInfo ipInfo = new StaffIPInfo(-1, uuid, ip, true, false, false, true);
             sm.createIpEntry(ipInfo);
             return;
+
         }
 
-        StaffIPInfo ipInfo =
-                sm.isIpRecognised(event.getUniqueId(), event.getAddress().getHostAddress());
+        StaffIPInfo ipInfo = sm.isIpRecognised(event.getUniqueId(), event.getAddress().getHostAddress());
         if (ipInfo == null) {
 
             ipInfo = new StaffIPInfo(-1, uuid, ip, false, false, false, true);
             sm.createIpEntry(ipInfo);
+
         }
 
         // Only challenge a new IP if the users's panel account is already set up.
@@ -57,20 +59,25 @@ public class SecurityEventListener implements Listener {
 
             event.kickMessage(kickMessage);
             return;
+
         }
 
         if (!ipInfo.isGameVerified()) {
 
             ipInfo.setGameVerified(true);
             sm.updateIpEntry(ipInfo);
+
         }
 
         sm.getStaffIPInfos().put(uuid, ipInfo);
+
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
 
         SecurityManager.getInstance().getStaffIPInfos().remove(event.getPlayer().getUniqueId());
+
     }
+
 }

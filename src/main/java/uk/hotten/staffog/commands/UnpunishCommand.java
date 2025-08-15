@@ -21,6 +21,7 @@ public class UnpunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&6Correct Usage: &e/" + label + " <player> <reason>"));
             return true;
+
         }
 
         PunishType commandType;
@@ -36,6 +37,7 @@ public class UnpunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&cERROR: Unsupported type for command."));
             return true;
+
         }
 
         UUID uuid = PunishManager.getInstance().getUUIDFromName(args[0]);
@@ -43,18 +45,19 @@ public class UnpunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&e" + args[0] + " has never joined the server!"));
             return true;
+
         }
 
         PunishEntry entry = PunishManager.getInstance().checkActivePunishment(commandType, uuid);
         if (entry == null) {
 
-            Message.staffOGMessage(
-                    (Player) sender, ("&c" + args[0] + " is not currently " + commandType.getBroadcastMessage() + "."));
+            Message.staffOGMessage((Player) sender,
+                    ("&c" + args[0] + " is not currently " + commandType.getBroadcastMessage() + "."));
             return true;
+
         }
 
-        entry.setRemovedUuid(
-                (sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "Console");
+        entry.setRemovedUuid((sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "Console");
         entry.setRemovedName((sender instanceof Player) ? ((Player) sender).getName() : "Console");
 
         ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
@@ -63,9 +66,11 @@ public class UnpunishCommand implements CommandExecutor {
         entry.setRemovedReason(reason);
 
         PunishManager.getInstance().removePunishment(entry);
-        Message.staffOGMessage(
-                (Player) sender, ("&7You have un" + commandType.getBroadcastMessage() + " " + entry.getName() + "."));
+        Message.staffOGMessage((Player) sender,
+                ("&7You have un" + commandType.getBroadcastMessage() + " " + entry.getName() + "."));
 
         return true;
+
     }
+
 }

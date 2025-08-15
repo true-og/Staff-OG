@@ -17,7 +17,7 @@ import uk.hotten.staffog.data.jooq.tables.StaffogWeb;
 /**
  * Convenience access to all tables in staffog.
  */
-@SuppressWarnings({"all", "unchecked", "rawtypes"})
+@SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
 
     /**
@@ -84,4 +84,5 @@ public class Tables {
      * The table <code>staffog.staffog_web</code>.
      */
     public static final StaffogWeb STAFFOG_WEB = StaffogWeb.STAFFOG_WEB;
+
 }

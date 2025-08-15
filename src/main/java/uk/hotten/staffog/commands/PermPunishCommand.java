@@ -24,6 +24,7 @@ public class PermPunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&6Correct Usage: &e/" + label + " <player> <reason>"));
             return true;
+
         }
 
         PunishType commandType;
@@ -39,6 +40,7 @@ public class PermPunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&cERROR: Unsupported type for command."));
             return true;
+
         }
 
         UUID uuid = PunishManager.getInstance().getUUIDFromName(args[0]);
@@ -46,17 +48,16 @@ public class PermPunishCommand implements CommandExecutor {
 
             Message.staffOGMessage((Player) sender, ("&c" + args[0] + " has never joined the server!"));
             return true;
+
         }
 
         PunishEntry isPunished = PunishManager.getInstance().checkActivePunishment(commandType, uuid);
         if (isPunished != null) {
 
-            Message.staffOGMessage(
-                    (Player) sender,
-                    ("&c" + args[0] + " is already " + commandType.getBroadcastMessage() + " for "
-                                    + TimeUtils.formatMillisecondTime(isPunished.calculateRemaining()))
-                            + ".");
+            Message.staffOGMessage((Player) sender, ("&c" + args[0] + " is already " + commandType.getBroadcastMessage()
+                    + " for " + TimeUtils.formatMillisecondTime(isPunished.calculateRemaining())) + ".");
             return true;
+
         }
 
         OfflinePlayer player = Bukkit.getServer().getOfflinePlayer(uuid);
@@ -67,9 +68,10 @@ public class PermPunishCommand implements CommandExecutor {
         if (player.isOnline()) {
 
             entry.setPlayer(player.getPlayer());
+
         }
-        entry.setByUuid(
-                (sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
+
+        entry.setByUuid((sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
         entry.setByName((sender instanceof Player) ? ((Player) sender).getName() : "NCP");
         entry.setTime(System.currentTimeMillis());
         entry.setUntil(-1);
@@ -83,9 +85,10 @@ public class PermPunishCommand implements CommandExecutor {
 
         PunishManager.getInstance().newPunishment(entry);
 
-        Message.staffOGMessage(
-                (Player) sender,
+        Message.staffOGMessage((Player) sender,
                 ("&7You have " + commandType.getBroadcastMessage() + " " + entry.getName() + " for permanent."));
         return true;
+
     }
+
 }

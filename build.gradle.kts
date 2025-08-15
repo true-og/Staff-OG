@@ -1,52 +1,59 @@
+/* This is free and unencumbered software released into the public domain */
+
+/* ------------------------------ Plugins ------------------------------ */
 plugins {
-    id("java") // Tell gradle this is a java project.
-    id("java-library") // Import helper for source-based libraries.
-    id("com.diffplug.spotless") version "7.0.4" // Import auto-formatter.
-    id("com.gradleup.shadow") version "8.3.6" // Import shadow API.
-    eclipse // Import eclipse plugin for IDE integration.
+    id("java") // Import Java plugin.
+    id("java-library") // Import Java Library plugin.
+    id("com.diffplug.spotless") version "7.0.4" // Import Spotless plugin.
+    id("com.gradleup.shadow") version "8.3.6" // Import Shadow plugin.
+    id("checkstyle") // Import Checkstyle plugin.
+    eclipse // Import Eclipse plugin.
+    kotlin("jvm") version "2.1.21" // Import Kotlin JVM plugin.
     id("io.freefair.lombok") version "8.13.1" // Automatic lombok support.
 }
 
+/* --------------------------- JDK / Kotlin ---------------------------- */
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-        vendor.set(JvmVendorSpec.GRAAL_VM)
+    sourceCompatibility = JavaVersion.VERSION_17 // Compile with JDK 17 compatibility.
+    toolchain { // Select Java toolchain.
+        languageVersion.set(JavaLanguageVersion.of(17)) // Use JDK 17.
+        vendor.set(JvmVendorSpec.GRAAL_VM) // Use GraalVM CE.
     }
 }
 
-group = "uk.hotten.staffog" // Declare bundle identifier.
+kotlin { jvmToolchain(17) }
 
-version = "1.0-beta" // Declare plugin version (will be in .jar).
+/* ----------------------------- Metadata ------------------------------ */
+group = "net.trueog.staff-og" // Declare bundle identifier.
+
+version = "1.0" // Declare plugin version (will be in .jar).
 
 val apiVersion = "1.19" // Declare minecraft server target version.
 
+/* ----------------------------- Resources ----------------------------- */
 tasks.named<ProcessResources>("processResources") {
     val props = mapOf("version" to version, "apiVersion" to apiVersion)
-
     inputs.properties(props) // Indicates to rerun if version changes.
-
     filesMatching("plugin.yml") { expand(props) }
-    from("LICENSE") { // Bundle license into .jars.
-        into("/")
-    }
+    from("LICENSE") { into("/") } // Bundle licenses into jarfiles.
 }
 
+/* ---------------------------- Repos ---------------------------------- */
 repositories {
-    mavenCentral()
-    gradlePluginPortal()
-    maven { url = uri("https://repo.purpurmc.org/snapshots") }
-    maven { url = uri("https://repo.purpurmc.org/snapshots") }
-    maven { url = uri("https://jitpack.io") }
+    mavenCentral() // Import the Maven Central Maven Repository.
+    gradlePluginPortal() // Import the Gradle Plugin Portal Maven Repository.
+    maven { url = uri("https://repo.purpurmc.org/snapshots") } // Import the PurpurMC Maven Repository.
+    maven { url = uri("https://jitpack.io") } // Import the Jitpack Maven Repository.
 }
 
+/* ---------------------- Java project deps ---------------------------- */
 dependencies {
     compileOnly("com.google.code.gson:gson:2.10.1") // Import google gson API.
     compileOnly("commons-io:commons-io:2.11.0") // Import google commons API.
     compileOnly("org.apache.commons:commons-pool2:2.11.1") // Import apache commons API.
     compileOnly("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0") // Import jakarta xml bind API.
     compileOnly("mysql:mysql-connector-java:8.0.32") // Import mysql connector API.
-    compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare purpur API version to be packaged.
+    compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") // Import Vault API.
     implementation("org.jooq:jooq:3.18.4") // Import jooq API.
     implementation("org.reactivestreams:reactive-streams:1.0.4") // Import reactive streams API.
@@ -55,7 +62,9 @@ dependencies {
     implementation("org.mariadb:r2dbc-mariadb:1.3.0") // Import R2DBC driver.
 }
 
-// Utility functions
+/* ---------------------- Utility functions ---------------------------- */
+
+// Update the plugin.yml version.
 fun revertPluginYmlVersion() {
     val yaml = file("src/main/resources/plugin.yml")
     val lines = yaml.readLines().toMutableList()
@@ -94,11 +103,13 @@ val updatePluginYmlVersion =
         }
     }
 
+/* ---------------------- Reproducible jars ---------------------------- */
 tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .jars
     isPreserveFileTimestamps = false
     isReproducibleFileOrder = true
 }
 
+/* ----------------------------- Shadow -------------------------------- */
 tasks.shadowJar {
     archiveClassifier.set(currentGitBranch())
     from("LICENSE") { into("/") }
@@ -124,29 +135,52 @@ tasks.build {
     dependsOn(tasks.shadowJar)
 }
 
-tasks.jar { archiveClassifier.set("part") }
+tasks.jar { archiveClassifier.set("part") } // Applies to root jarfile only.
 
+tasks.build { dependsOn(tasks.spotlessApply, tasks.shadowJar) } // Build depends on spotless and shadow.
+
+/* --------------------------- Javac opts ------------------------------- */
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("-parameters")
-    options.compilerArgs.add("-Xlint:deprecation") // Triggers deprecation warning messages.
-    options.encoding = "UTF-8"
-    options.isFork = true
+    options.compilerArgs.add("-parameters") // Enable reflection for java code.
+    options.isFork = true // Run javac in its own process.
+    options.compilerArgs.add("-Xlint:deprecation") // Trigger deprecation warning messages.
+    options.encoding = "UTF-8" // Use UTF-8 file encoding.
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-        vendor = JvmVendorSpec.GRAAL_VM
-    }
-}
-
+/* ----------------------------- Auto Formatting ------------------------ */
 spotless {
     java {
-        removeUnusedImports()
-        palantirJavaFormat()
+        eclipse().configFile("config/formatter/eclipse-java-formatter.xml") // Eclipse java formatting.
+        leadingTabsToSpaces() // Convert leftover leading tabs to spaces.
+        removeUnusedImports() // Remove imports that aren't being called.
     }
     kotlinGradle {
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        target("build.gradle.kts", "settings.gradle.kts")
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) } // JetBrains Kotlin formatting.
+        target("build.gradle.kts", "settings.gradle.kts") // Gradle files to format.
     }
+}
+
+checkstyle {
+    toolVersion = "10.18.1" // Declare checkstyle version to use.
+    configFile = file("config/checkstyle/checkstyle.xml") // Point checkstyle to config file.
+    isIgnoreFailures = true // Don't fail the build if checkstyle does not pass.
+    isShowViolations = true // Show the violations in any IDE with the checkstyle plugin.
+}
+
+tasks.named("compileJava") {
+    dependsOn("spotlessApply") // Run spotless before compiling with the JDK.
+}
+
+tasks.named("spotlessCheck") {
+    dependsOn("spotlessApply") // Run spotless before checking if spotless ran.
+}
+
+/* ------------------------------ Eclipse SHIM ------------------------- */
+
+// This can't be put in eclipse.gradle.kts because Gradle is weird.
+subprojects {
+    apply(plugin = "java-library")
+    apply(plugin = "eclipse")
+    eclipse.project.name = "${project.name}-${rootProject.name}"
+    tasks.withType<Jar>().configureEach { archiveBaseName.set("${project.name}-${rootProject.name}") }
 }

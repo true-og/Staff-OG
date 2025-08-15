@@ -14,12 +14,14 @@ public class DataEventListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
 
         updatePlayerCounts();
+
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
 
         Bukkit.getServer().getScheduler().runTaskLater(DatabaseManager.getPlugin(), this::updatePlayerCounts, 10);
+
     }
 
     private void updatePlayerCounts() {
@@ -27,9 +29,7 @@ public class DataEventListener implements Listener {
         DatabaseManager dbm = DatabaseManager.getInstance();
 
         // All players
-        dbm.setStatEntry(
-                "player_count",
-                String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
+        dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
 
         // Staff
         int amount = 0;
@@ -38,9 +38,13 @@ public class DataEventListener implements Listener {
             if (StaffOGPlugin.getVaultPerms().has(p, "staffog.isstaff")) {
 
                 amount++;
+
             }
+
         }
 
         dbm.setStatEntry("staff_count", String.valueOf(amount));
+
     }
+
 }

@@ -16,4 +16,5 @@ public class TaskEntry {
     @Getter
     @Setter
     private String data;
+
 }

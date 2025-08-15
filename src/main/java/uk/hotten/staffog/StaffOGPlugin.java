@@ -47,6 +47,7 @@ public class StaffOGPlugin extends JavaPlugin {
 
             Console.error("Vault not found. Plugin will be disabled.");
             getServer().getPluginManager().disablePlugin(this);
+
         }
 
         reportWebAddress = this.getConfig().getString("reportWebAddress");
@@ -71,6 +72,7 @@ public class StaffOGPlugin extends JavaPlugin {
         databaseManager.setStatEntry("server_status", "online");
 
         Console.info("Staff-OG is ready!");
+
     }
 
     @Override
@@ -79,15 +81,16 @@ public class StaffOGPlugin extends JavaPlugin {
         DatabaseManager.getInstance().setStatEntry("server_status", "offline");
         DatabaseManager.getInstance().setStatEntry("player_count", "0");
         DatabaseManager.getInstance().setStatEntry("staff_count", "0");
+
     }
 
     private boolean setupVaultPerms() {
 
-        RegisteredServiceProvider<Permission> rsp =
-                getServer().getServicesManager().getRegistration(Permission.class);
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         vaultPerms = rsp.getProvider();
 
         return vaultPerms != null;
+
     }
 
     // Class constructor.
@@ -95,5 +98,7 @@ public class StaffOGPlugin extends JavaPlugin {
 
         // Pass instance of main to other classes.
         return plugin;
+
     }
+
 }

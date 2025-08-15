@@ -15,7 +15,9 @@ public class TimeUtils {
     public static DateFormat notificationTimeFormat = new SimpleDateFormat("dd-MM-yy");
 
     public static String formatMillisecondTime(long millis) {
-        if (millis == -1) return "permanent";
+
+        if (millis == -1)
+            return "permanent";
 
         // create the list
         List<TimeUnit> units = new ArrayList<TimeUnit>(EnumSet.allOf(TimeUnit.class));
@@ -38,22 +40,27 @@ public class TimeUtils {
 
             // put the result in the map
             result.put(unit, diff);
+
         }
 
         if (millis > 86400000) {
+
             result.remove(TimeUnit.MINUTES);
             result.remove(TimeUnit.SECONDS);
+
         }
 
         for (Map.Entry<TimeUnit, Long> entry : result.entrySet()) {
-            if (entry.getValue() == 0) continue;
 
-            toReturn.append(entry.getValue())
-                    .append(" ")
-                    .append(entry.getKey().name().toLowerCase())
-                    .append(" ");
+            if (entry.getValue() == 0)
+                continue;
+
+            toReturn.append(entry.getValue()).append(" ").append(entry.getKey().name().toLowerCase()).append(" ");
+
         }
 
         return toReturn.toString().trim();
+
     }
+
 }

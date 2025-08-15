@@ -20,4 +20,5 @@ public class NewReportTask {
     @Getter
     @Setter
     private String type;
+
 }

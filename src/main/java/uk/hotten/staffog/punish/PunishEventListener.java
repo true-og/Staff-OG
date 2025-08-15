@@ -20,8 +20,8 @@ public class PunishEventListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
 
-        PunishManager.getInstance()
-                .checkNameToUuid(event.getPlayer().getName(), event.getPlayer().getUniqueId());
+        PunishManager.getInstance().checkNameToUuid(event.getPlayer().getName(), event.getPlayer().getUniqueId());
+
     }
 
     @EventHandler
@@ -29,15 +29,13 @@ public class PunishEventListener implements Listener {
 
         PunishEntry entry = PunishManager.getInstance().checkActivePunishment(PunishType.BAN, event.getUniqueId());
 
-        if (entry == null) return;
+        if (entry == null)
+            return;
 
         event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_BANNED);
 
-        String messageString = "&cYou have been banned for: \n" + "&f"
-                + entry.getReason() + "\n\n" + "&c"
-                + "Your ban "
-                + (entry.getUntil() == -1
-                        ? "does not expire."
+        String messageString = "&cYou have been banned for: \n" + "&f" + entry.getReason() + "\n\n" + "&c" + "Your ban "
+                + (entry.getUntil() == -1 ? "does not expire."
                         : "will expire in:\n" + "&f" + TimeUtils.formatMillisecondTime(entry.calculateRemaining()));
 
         // Create a MiniMessage instance.
@@ -46,29 +44,29 @@ public class PunishEventListener implements Listener {
         Component kickMessage = miniMessage.deserialize(messageString);
 
         event.kickMessage(kickMessage);
+
     }
 
     @EventHandler
     public void onAsyncChat(AsyncChatEvent event) {
 
-        PunishEntry entry = PunishManager.getInstance()
-                .checkActivePunishment(PunishType.MUTE, event.getPlayer().getUniqueId());
+        PunishEntry entry = PunishManager.getInstance().checkActivePunishment(PunishType.MUTE,
+                event.getPlayer().getUniqueId());
 
         if (entry != null) {
 
             event.setCancelled(true);
             event.getPlayer().sendMessage(Message.format("&c" + "You have been muted for " + "&6" + entry.getReason()));
-            event.getPlayer()
-                    .sendMessage(Message.format("&c" + "Your mute "
-                            + (entry.getUntil() == -1
-                                    ? "does not expire."
-                                    : "will expire in: " + "&f"
-                                            + TimeUtils.formatMillisecondTime(entry.calculateRemaining()))));
+            event.getPlayer().sendMessage(Message.format("&c" + "Your mute " + (entry.getUntil() == -1
+                    ? "does not expire."
+                    : "will expire in: " + "&f" + TimeUtils.formatMillisecondTime(entry.calculateRemaining()))));
 
         } else {
 
             return;
+
         }
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -77,17 +75,19 @@ public class PunishEventListener implements Listener {
         if (event.isCancelled()) {
 
             return;
+
         }
 
         String eventMessage = MiniMessage.miniMessage().serialize(event.message());
 
         PunishManager pm = PunishManager.getInstance();
-        ChatReportEntry entry = new ChatReportEntry(
-                event.getPlayer().getUniqueId(), event.getPlayer().getName(), eventMessage, System.currentTimeMillis());
+        ChatReportEntry entry = new ChatReportEntry(event.getPlayer().getUniqueId(), event.getPlayer().getName(),
+                eventMessage, System.currentTimeMillis());
 
         pm.getChatReportEntries().add(entry);
-        Bukkit.getServer()
-                .getScheduler()
-                .runTaskLater(pm.getPlugin(), () -> pm.getChatReportEntries().remove(entry), 2400); // remove 2m later
+        Bukkit.getServer().getScheduler().runTaskLater(pm.getPlugin(), () -> pm.getChatReportEntries().remove(entry),
+                2400); // remove 2m later
+
     }
+
 }

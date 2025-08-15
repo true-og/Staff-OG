@@ -74,6 +74,7 @@ public class PunishEntry {
     public PunishEntry(PunishType type) {
 
         this.type = type;
+
     }
 
     public long calculateDuration() {
@@ -81,9 +82,11 @@ public class PunishEntry {
         if (until == -1) {
 
             return -1;
+
         }
 
         return until - time;
+
     }
 
     public long calculateRemaining() {
@@ -91,9 +94,11 @@ public class PunishEntry {
         if (until == -1) {
 
             return -1;
+
         }
 
         return until - System.currentTimeMillis();
+
     }
 
     public boolean checkDurationOver() {
@@ -101,9 +106,11 @@ public class PunishEntry {
         if (until == -1) {
 
             return false;
+
         }
 
         return (calculateRemaining() <= 0);
+
     }
 
     public String calculateUntilDate() {
@@ -111,10 +118,13 @@ public class PunishEntry {
         if (until == -1) {
 
             return "forever";
+
         }
 
         Date date = new Date(until);
 
         return TimeUtils.notificationTimeFormat.format(date);
+
     }
+
 }

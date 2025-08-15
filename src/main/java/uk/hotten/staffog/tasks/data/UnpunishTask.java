@@ -18,5 +18,7 @@ public class UnpunishTask {
 
         this.type = PunishType.valueOf(type);
         this.id = id;
+
     }
+
 }
