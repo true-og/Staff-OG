@@ -3,7 +3,7 @@ appealWebAddress: "https://appeal.trueog.net"
 
 sqlType: mariadb # Options: mariadb or mysql
 sqlHost: localhost
-sqlUsername: username
-sqlPassword: password
+sqlUsername: $MARIADB_USER
+sqlPassword: $MARIADB_PASSWORD
 sqlDatabase: staffog
 sqlPort: 3306
