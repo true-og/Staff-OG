@@ -1,5 +1,5 @@
 # Staff-OG
-Punishment system for TrueOG.
+Punishment system for [TrueOG Network](https://trueog.net).
 
 ## Commands and Permissions
 - /perm[ban/mute] <player> <reason> - staffog.command.perm[ban/mute]

@@ -12,6 +12,10 @@ plugins {
     id("io.freefair.lombok") version "8.13.1" // Automatic lombok support.
 }
 
+extra["kotlinAttribute"] = Attribute.of("kotlin-tag", Boolean::class.javaObjectType)
+
+val kotlinAttribute: Attribute<Boolean> by rootProject.extra
+
 /* --------------------------- JDK / Kotlin ---------------------------- */
 java {
     sourceCompatibility = JavaVersion.VERSION_17 // Compile with JDK 17 compatibility.
@@ -55,6 +59,7 @@ dependencies {
     compileOnly("mysql:mysql-connector-java:8.0.32") // Import mysql connector API.
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") // Import Vault API.
+    compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     implementation("org.jooq:jooq:3.18.4") // Import jooq API.
     implementation("org.reactivestreams:reactive-streams:1.0.4") // Import reactive streams API.
     implementation("org.mariadb.jdbc:mariadb-java-client:3.1.3") // Import JDBC API.
@@ -102,6 +107,8 @@ val updatePluginYmlVersion =
             yaml.writeText(lines.joinToString("\n"))
         }
     }
+
+apply(from = "eclipse.gradle.kts") // Import eclipse classpath support script.
 
 /* ---------------------- Reproducible jars ---------------------------- */
 tasks.withType<AbstractArchiveTask>().configureEach { // Ensure reproducible .jars

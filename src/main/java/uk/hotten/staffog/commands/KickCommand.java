@@ -2,14 +2,17 @@ package uk.hotten.staffog.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import net.trueog.utilitiesog.UtilitiesOG;
+import uk.hotten.staffog.StaffOGPlugin;
 import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
-import uk.hotten.staffog.utils.Message;
 
 public class KickCommand implements CommandExecutor {
 
@@ -18,20 +21,20 @@ public class KickCommand implements CommandExecutor {
 
         if (args == null || args.length < 1) {
 
-            Message.staffOGMessage((Player) sender, "&6Correct Usage: &e/kick <player> [reason]");
+            UtilitiesOG.trueogMessage((Player) sender, "&6Correct Usage: &e/kick <player> [reason]");
             return true;
 
         }
 
-        Player toKick = Bukkit.getServer().getPlayer(args[0]);
+        final Player toKick = Bukkit.getServer().getPlayer(args[0]);
         if (toKick == null) {
 
-            Message.staffOGMessage((Player) sender, ("&c" + args[0] + " is not online!"));
+            UtilitiesOG.trueogMessage((Player) sender, ("&c" + args[0] + " is not online!"));
             return true;
 
         }
 
-        KickPunishEntry entry = new KickPunishEntry();
+        final KickPunishEntry entry = new KickPunishEntry();
         entry.setUuid(toKick.getUniqueId());
         entry.setName(toKick.getName());
         entry.setPlayer(toKick);
@@ -41,9 +44,9 @@ public class KickCommand implements CommandExecutor {
 
         if (args.length >= 2) {
 
-            ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
+            final ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
             preReason.remove(0);
-            String reason = String.join(" ", preReason);
+            final String reason = String.join(" ", preReason);
             entry.setReason(reason);
 
         } else {
@@ -53,7 +56,18 @@ public class KickCommand implements CommandExecutor {
         }
 
         PunishManager.getInstance().newKickPunishment(entry);
-        Message.staffOGMessage((Player) sender, ("&7" + "You have kicked " + entry.getName() + "."));
+        if (sender instanceof Player player) {
+
+            UtilitiesOG.trueogMessage(player,
+                    "&7You have kicked &e" + entry.getName() + " &7for &e" + entry.getReason() + "&7.");
+
+        } else {
+
+            UtilitiesOG.logToConsole(StaffOGPlugin.prependPrefix(" "),
+                    "&7You have kicked &e" + entry.getName() + " &7for &e" + entry.getReason() + "&7.");
+
+        }
+
         return true;
 
     }

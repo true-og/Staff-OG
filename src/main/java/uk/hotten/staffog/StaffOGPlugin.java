@@ -1,9 +1,13 @@
 package uk.hotten.staffog;
 
-import lombok.Getter;
-import net.milkbowl.vault.permission.Permission;
+import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import lombok.Getter;
+import net.milkbowl.vault.permission.Permission;
+import net.trueog.utilitiesog.UtilitiesOG;
 import uk.hotten.staffog.commands.ChatReportCommand;
 import uk.hotten.staffog.commands.KickCommand;
 import uk.hotten.staffog.commands.LinkPanelCommand;
@@ -98,6 +102,28 @@ public class StaffOGPlugin extends JavaPlugin {
 
         // Pass instance of main to other classes.
         return plugin;
+
+    }
+
+    public static String prependPrefix(String message) {
+
+        return "" + "&7" + "[" + "&e" + "Staff-OG" + "&7" + "] " + "&r" + message;
+
+    }
+
+    public static String formatNotification(String prefix, String message) {
+
+        return "" + "&c" + StringUtils.upperCase(prefix) + " | " + "&B" + "Notification " + "&8" + "> " + "&r"
+                + message;
+
+    }
+
+    public static void staffBroadcast(String message) {
+
+        Bukkit.getServer().getOnlinePlayers().stream().filter(p -> p.hasPermission("staffog.seebroadcast"))
+                .forEach(p -> UtilitiesOG.trueogMessage(p, message));
+
+        UtilitiesOG.logToConsole(prependPrefix(""), message);
 
     }
 

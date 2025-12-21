@@ -1,13 +1,18 @@
 package uk.hotten.staffog.tasks;
 
-import com.google.gson.Gson;
 import java.sql.Connection;
 import java.util.ArrayList;
-import lombok.Getter;
+
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+
+import com.google.gson.Gson;
+
+import lombok.Getter;
+import uk.hotten.staffog.StaffOGPlugin;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.data.jooq.Tables;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogTaskRecord;
@@ -17,12 +22,11 @@ import uk.hotten.staffog.tasks.data.NewAppealTask;
 import uk.hotten.staffog.tasks.data.NewReportTask;
 import uk.hotten.staffog.tasks.data.TaskEntry;
 import uk.hotten.staffog.tasks.data.UnpunishTask;
-import uk.hotten.staffog.utils.Message;
 
 public class TaskManager {
 
     @Getter
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
 
     public TaskManager(JavaPlugin plugin) {
 
@@ -66,21 +70,21 @@ public class TaskManager {
 
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            ArrayList<TaskEntry> toReturn = new ArrayList<>();
+            final ArrayList<TaskEntry> toReturn = new ArrayList<>();
 
-            DSLContext dsl = DSL.using(connection);
-            Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk()).from(Tables.STAFFOG_TASK)
-                    .fetchInto(Tables.STAFFOG_TASK);
+            final DSLContext dsl = DSL.using(connection);
+            final Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk())
+                    .from(Tables.STAFFOG_TASK).fetchInto(Tables.STAFFOG_TASK);
 
-            for (StaffogTaskRecord record : result) {
+            result.forEach(record -> {
 
-                TaskEntry entry = new TaskEntry();
+                final TaskEntry entry = new TaskEntry();
                 entry.setId(record.getId());
                 entry.setTask(record.getTask());
                 entry.setData(record.getData());
                 toReturn.add(entry);
 
-            }
+            });
 
             return toReturn;
 
@@ -95,15 +99,15 @@ public class TaskManager {
 
     private void processUnpunish(TaskEntry entry) {
 
-        if (!entry.getTask().equals("unpunish")) {
+        if (!"unpunish".equals(entry.getTask())) {
 
             return;
 
         }
 
-        Gson gson = new Gson();
-        UnpunishTask task = gson.fromJson(entry.getData(), UnpunishTask.class);
-        PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
+        final Gson gson = new Gson();
+        final UnpunishTask task = gson.fromJson(entry.getData(), UnpunishTask.class);
+        final PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
 
         PunishManager.getInstance().visualRemovePunishment(punishEntry);
 
@@ -111,33 +115,33 @@ public class TaskManager {
 
     private void processNewReport(TaskEntry entry) {
 
-        if (!entry.getTask().equals("newreport")) {
+        if (!"newreport".equals(entry.getTask())) {
 
             return;
 
         }
 
-        Gson gson = new Gson();
-        NewReportTask task = gson.fromJson(entry.getData(), NewReportTask.class);
+        final Gson gson = new Gson();
+        final NewReportTask task = gson.fromJson(entry.getData(), NewReportTask.class);
 
-        Message.staffBroadcast(Message.formatNotification("REPORT", "New " + task.getType() + " report #" + task.getId()
-                + " by " + task.getBy() + " against " + task.getOffender()));
+        StaffOGPlugin.staffBroadcast(StaffOGPlugin.formatNotification("REPORT", "New " + task.getType() + " report #"
+                + task.getId() + " by " + task.getBy() + " against " + task.getOffender()));
 
     }
 
     private void processNewAppeal(TaskEntry entry) {
 
-        if (!entry.getTask().equals("newappeal")) {
+        if (!"newappeal".equals(entry.getTask())) {
 
             return;
 
         }
 
-        Gson gson = new Gson();
-        NewAppealTask task = gson.fromJson(entry.getData(), NewAppealTask.class);
+        final Gson gson = new Gson();
+        final NewAppealTask task = gson.fromJson(entry.getData(), NewAppealTask.class);
 
-        Message.staffBroadcast(Message.formatNotification("APPEAL",
-                "New " + task.getType().toLowerCase() + " appeal #" + task.getId() + " by " + task.getBy()));
+        StaffOGPlugin.staffBroadcast(StaffOGPlugin.formatNotification("APPEAL",
+                "New " + StringUtils.lowerCase(task.getType()) + " appeal #" + task.getId() + " by " + task.getBy()));
 
     }
 
@@ -145,7 +149,7 @@ public class TaskManager {
 
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection);
+            final DSLContext dsl = DSL.using(connection);
             dsl.delete(Tables.STAFFOG_TASK).where(Tables.STAFFOG_TASK.ID.eq(id)).execute();
 
         } catch (Exception error) {

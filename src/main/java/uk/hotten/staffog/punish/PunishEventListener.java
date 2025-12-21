@@ -1,18 +1,19 @@
 package uk.hotten.staffog.punish;
 
-import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.trueog.utilitiesog.UtilitiesOG;
 import uk.hotten.staffog.punish.data.ChatReportEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
-import uk.hotten.staffog.utils.Message;
 import uk.hotten.staffog.utils.TimeUtils;
 
 public class PunishEventListener implements Listener {
@@ -27,21 +28,25 @@ public class PunishEventListener implements Listener {
     @EventHandler
     public void onAsyncPreJoin(AsyncPlayerPreLoginEvent event) {
 
-        PunishEntry entry = PunishManager.getInstance().checkActivePunishment(PunishType.BAN, event.getUniqueId());
+        final PunishEntry entry = PunishManager.getInstance().checkActivePunishment(PunishType.BAN,
+                event.getUniqueId());
 
-        if (entry == null)
+        if (entry == null) {
+
             return;
+
+        }
 
         event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_BANNED);
 
-        String messageString = "&cYou have been banned for: \n" + "&f" + entry.getReason() + "\n\n" + "&c" + "Your ban "
-                + (entry.getUntil() == -1 ? "does not expire."
+        final String messageString = "&cYou have been banned for: \n" + "&f" + entry.getReason() + "\n\n" + "&c"
+                + "Your ban " + (entry.getUntil() == -1 ? "does not expire."
                         : "will expire in:\n" + "&f" + TimeUtils.formatMillisecondTime(entry.calculateRemaining()));
 
         // Create a MiniMessage instance.
-        MiniMessage miniMessage = MiniMessage.miniMessage();
+        final MiniMessage miniMessage = MiniMessage.miniMessage();
         // Deserialize the string into a TextComponent.å
-        Component kickMessage = miniMessage.deserialize(messageString);
+        final Component kickMessage = miniMessage.deserialize(messageString);
 
         event.kickMessage(kickMessage);
 
@@ -50,16 +55,16 @@ public class PunishEventListener implements Listener {
     @EventHandler
     public void onAsyncChat(AsyncChatEvent event) {
 
-        PunishEntry entry = PunishManager.getInstance().checkActivePunishment(PunishType.MUTE,
+        final PunishEntry entry = PunishManager.getInstance().checkActivePunishment(PunishType.MUTE,
                 event.getPlayer().getUniqueId());
 
         if (entry != null) {
 
             event.setCancelled(true);
-            event.getPlayer().sendMessage(Message.format("&c" + "You have been muted for " + "&6" + entry.getReason()));
-            event.getPlayer().sendMessage(Message.format("&c" + "Your mute " + (entry.getUntil() == -1
-                    ? "does not expire."
-                    : "will expire in: " + "&f" + TimeUtils.formatMillisecondTime(entry.calculateRemaining()))));
+            UtilitiesOG.trueogMessage(event.getPlayer(), "&c" + "You have been muted for " + "&6" + entry.getReason());
+            UtilitiesOG.trueogMessage(event.getPlayer(),
+                    "&c" + "Your mute " + (entry.getUntil() == -1 ? "does not expire."
+                            : "will expire in: " + "&f" + TimeUtils.formatMillisecondTime(entry.calculateRemaining())));
 
         } else {
 
@@ -78,10 +83,10 @@ public class PunishEventListener implements Listener {
 
         }
 
-        String eventMessage = MiniMessage.miniMessage().serialize(event.message());
+        final String eventMessage = MiniMessage.miniMessage().serialize(event.message());
 
-        PunishManager pm = PunishManager.getInstance();
-        ChatReportEntry entry = new ChatReportEntry(event.getPlayer().getUniqueId(), event.getPlayer().getName(),
+        final PunishManager pm = PunishManager.getInstance();
+        final ChatReportEntry entry = new ChatReportEntry(event.getPlayer().getUniqueId(), event.getPlayer().getName(),
                 eventMessage, System.currentTimeMillis());
 
         pm.getChatReportEntries().add(entry);
