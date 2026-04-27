@@ -2,10 +2,10 @@ package uk.hotten.staffog.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -46,13 +46,15 @@ public class TempPunishCommand implements CommandExecutor {
         }
 
         final Date currentTime = new Date(System.currentTimeMillis());
+        final Calendar until = Calendar.getInstance();
+        until.setTime(currentTime);
         final long untilTime;
         switch (StringUtils.lowerCase(args[1])) {
 
-            case "d" -> untilTime = DateUtils.addDays(currentTime, amount).getTime();
-            case "w" -> untilTime = DateUtils.addWeeks(currentTime, amount).getTime();
-            case "m" -> untilTime = DateUtils.addMonths(currentTime, amount).getTime();
-            case "y" -> untilTime = DateUtils.addYears(currentTime, amount).getTime();
+            case "d" -> until.add(Calendar.DAY_OF_MONTH, amount);
+            case "w" -> until.add(Calendar.WEEK_OF_YEAR, amount);
+            case "m" -> until.add(Calendar.MONTH, amount);
+            case "y" -> until.add(Calendar.YEAR, amount);
             default -> {
 
                 UtilitiesOG.trueogMessage((Player) sender,
@@ -62,6 +64,8 @@ public class TempPunishCommand implements CommandExecutor {
             }
 
         }
+
+        untilTime = until.getTimeInMillis();
 
         final PunishType commandType;
         if (StringUtils.contains(StringUtils.lowerCase(label), "tempban")) {

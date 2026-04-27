@@ -47,7 +47,7 @@ public class LinkPanelCommand implements CommandExecutor {
         }
 
         final String code = sm.createLinkCode(player.getUniqueId(),
-                StaffOGPlugin.getVaultPerms().has(player, "staffog.paneladmin"));
+                StaffOGPlugin.hasPermission(player, "staffog.paneladmin"));
         if (code == null) {
 
             UtilitiesOG.trueogMessage(player,

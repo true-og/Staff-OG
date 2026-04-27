@@ -58,7 +58,7 @@ dependencies {
     compileOnly("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0") // Import jakarta xml bind API.
     compileOnly("mysql:mysql-connector-java:8.0.32") // Import mysql connector API.
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare Purpur API version to be packaged.
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7") // Import Vault API.
+    compileOnly("net.luckperms:api:5.5") // Import LuckPerms API.
     compileOnlyApi(project(":libs:Utilities-OG")) // Import TrueOG Network Utilities-OG Java API (from source).
     implementation("org.jooq:jooq:3.18.4") // Import jooq API.
     implementation("org.reactivestreams:reactive-streams:1.0.4") // Import reactive streams API.

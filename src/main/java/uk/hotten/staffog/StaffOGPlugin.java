@@ -2,11 +2,18 @@ package uk.hotten.staffog;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import lombok.Getter;
-import net.milkbowl.vault.permission.Permission;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.context.MutableContextSet;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.platform.PlayerAdapter;
+import net.luckperms.api.query.QueryOptions;
 import net.trueog.utilitiesog.UtilitiesOG;
 import uk.hotten.staffog.commands.ChatReportCommand;
 import uk.hotten.staffog.commands.KickCommand;
@@ -26,7 +33,9 @@ public class StaffOGPlugin extends JavaPlugin {
     private static StaffOGPlugin plugin;
 
     @Getter
-    private static Permission vaultPerms;
+    private static LuckPerms luckPerms;
+
+    private static PlayerAdapter<Player> luckPermsPlayerAdapter;
 
     @Getter
     private static String reportWebAddress;
@@ -47,10 +56,11 @@ public class StaffOGPlugin extends JavaPlugin {
 
         this.saveDefaultConfig();
 
-        if (!setupVaultPerms()) {
+        if (!setupLuckPerms()) {
 
-            Console.error("Vault not found. Plugin will be disabled.");
+            Console.error("LuckPerms not found. Plugin will be disabled.");
             getServer().getPluginManager().disablePlugin(this);
+            return;
 
         }
 
@@ -82,18 +92,100 @@ public class StaffOGPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
 
+        if (DatabaseManager.getInstance() == null) {
+
+            return;
+
+        }
+
         DatabaseManager.getInstance().setStatEntry("server_status", "offline");
         DatabaseManager.getInstance().setStatEntry("player_count", "0");
         DatabaseManager.getInstance().setStatEntry("staff_count", "0");
 
     }
 
-    private boolean setupVaultPerms() {
+    private boolean setupLuckPerms() {
 
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        vaultPerms = rsp.getProvider();
+        RegisteredServiceProvider<LuckPerms> rsp = getServer().getServicesManager().getRegistration(LuckPerms.class);
+        if (rsp == null) {
 
-        return vaultPerms != null;
+            return false;
+
+        }
+
+        luckPerms = rsp.getProvider();
+        if (luckPerms == null) {
+
+            return false;
+
+        }
+
+        luckPermsPlayerAdapter = luckPerms.getPlayerAdapter(Player.class);
+
+        return true;
+
+    }
+
+    public static boolean hasPermission(Player player, String permission) {
+
+        return luckPermsPlayerAdapter.getPermissionData(player).checkPermission(permission).asBoolean();
+
+    }
+
+    public static boolean hasPermission(UUID uuid, String username, String worldName, String permission) {
+
+        if (Bukkit.isPrimaryThread()) {
+
+            Console.error("Offline LuckPerms permission checks must not run on the main server thread.");
+            return false;
+
+        }
+
+        boolean wasLoaded = luckPerms.getUserManager().isLoaded(uuid);
+        User user;
+        try {
+
+            user = luckPerms.getUserManager().loadUser(uuid, username).get();
+
+        } catch (InterruptedException error) {
+
+            Thread.currentThread().interrupt();
+            Console.error("Interrupted while loading LuckPerms user for permission check.");
+            return false;
+
+        } catch (ExecutionException error) {
+
+            Console.error("Failed to load LuckPerms user for permission check.");
+            error.printStackTrace();
+            return false;
+
+        }
+
+        try {
+
+            QueryOptions queryOptions = withWorldContext(luckPerms.getContextManager().getStaticQueryOptions(),
+                    worldName);
+            return user.getCachedData().getPermissionData(queryOptions).checkPermission(permission).asBoolean();
+
+        } finally {
+
+            if (!wasLoaded) {
+
+                luckPerms.getUserManager().cleanupUser(user);
+
+            }
+
+        }
+
+    }
+
+    private static QueryOptions withWorldContext(QueryOptions queryOptions, String worldName) {
+
+        MutableContextSet contexts = queryOptions.context().mutableCopy();
+        contexts.removeAll("world");
+        contexts.add("world", worldName);
+
+        return queryOptions.toBuilder().context(contexts).build();
 
     }
 

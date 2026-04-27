@@ -3,7 +3,6 @@ package uk.hotten.staffog.security;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -19,7 +18,7 @@ public class SecurityEventListener implements Listener {
         SecurityManager sm = SecurityManager.getInstance();
         UUID uuid = event.getUniqueId();
 
-        if (!StaffOGPlugin.getVaultPerms().playerHas("world", Bukkit.getOfflinePlayer(uuid), "staffog.panelaccess")) {
+        if (!StaffOGPlugin.hasPermission(uuid, event.getName(), "world", "staffog.panelaccess")) {
 
             return;
 

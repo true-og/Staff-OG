@@ -4,7 +4,7 @@ version: 1.0
 api-version: 1.19
 author: Gxorge
 description: Punishment system for TrueOG.
-depend: [Vault]
+depend: [LuckPerms]
 
 commands:
   linkpanel:

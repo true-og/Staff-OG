@@ -35,7 +35,7 @@ public class DataEventListener implements Listener {
         int amount = 0;
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
 
-            if (StaffOGPlugin.getVaultPerms().has(p, "staffog.isstaff")) {
+            if (StaffOGPlugin.hasPermission(p, "staffog.isstaff")) {
 
                 amount++;
 
