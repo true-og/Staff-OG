@@ -1,0 +1,6 @@
+name: Staff-OG
+version: '${version}'
+
+main: net.trueog.staffog.StaffOG
+api-version: '1.19'
+load: POSTWORLD
