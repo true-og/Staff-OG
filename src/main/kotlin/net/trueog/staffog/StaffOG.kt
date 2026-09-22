@@ -1,7 +1,9 @@
 package net.trueog.staffog
 
 import io.grpc.Server
-import io.grpc.ServerBuilder
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
+import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,32 +15,53 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.core.LoggerContext
 import org.apache.logging.log4j.core.config.LoggerConfig
 import org.apache.logging.log4j.Level
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.concurrent.TimeUnit
+import java.io.File
 
 class StaffOG : JavaPlugin() {
     companion object {
         lateinit var plugin: StaffOG
+        lateinit var config: Config
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     }
 
     private lateinit var grpcServer: Server
+    fun isGrpcServerInitialized() = ::grpcServer.isInitialized
 
     override fun onEnable() {
         suppressNettyError()
 
         plugin = this
 
+        Companion.config = Config.create() ?: run {
+            Bukkit.getPluginManager().disablePlugin(this)
+            return
+        }
+
         this.server.pluginManager.registerEvents(Events(), this)
 
-        grpcServer = ServerBuilder.forPort(65226)
+        val builder = NettyServerBuilder.forPort(Companion.config.port)
             .addService(IpCheckEndpoint())
-            .build().start()
+
+        if (Companion.config.sslEnabled) {
+            builder.sslContext(
+                GrpcSslContexts
+                    .forServer(File(Companion.config.cert!!), File(Companion.config.privateKey!!))
+                    .trustManager(File(Companion.config.trustCa!!))
+                    .clientAuth(ClientAuth.REQUIRE)
+                    .build()
+            )
+        }
+
+        grpcServer = builder.build().start()
     }
 
     override fun onDisable() {
-        grpcServer.shutdownNow()
-        grpcServer.awaitTermination()
+        if (isGrpcServerInitialized()) {
+            grpcServer.shutdownNow()
+            grpcServer.awaitTermination()
+        }
 
         scope.cancel()
         runBlocking { scope.coroutineContext[Job]?.join() }

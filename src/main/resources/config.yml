@@ -1,0 +1,6 @@
+port: 65226
+
+sslEnabled: false
+trustCa:
+cert:
+privateKey:
