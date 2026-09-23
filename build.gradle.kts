@@ -2,6 +2,7 @@ import com.google.protobuf.gradle.id
 
 plugins {
     kotlin("jvm") version "2.3.20"
+    eclipse
     id("com.gradleup.shadow") version "8.3.9"
     id("com.google.protobuf") version "0.10.0"
 }
