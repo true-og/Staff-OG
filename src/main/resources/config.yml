@@ -1,6 +1,6 @@
 port: 65226
 
 sslEnabled: false
-trustCa:
-cert:
-privateKey:
+trustCa: plugins/Staff-OG/ca.crt
+cert: plugins/Staff-OG/server.crt
+privateKey: plugins/Staff-OG/server.key
