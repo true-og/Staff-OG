@@ -4,9 +4,9 @@ import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.time.delay
-import net.trueog.staffog.StaffOG
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.time.withTimeout
 import proto.IpCheckReply
 import proto.IpCheckRequest
 import proto.IpCheckerGrpcKt
@@ -23,19 +23,21 @@ class IpCheckEndpoint : IpCheckerGrpcKt.IpCheckerCoroutineImplBase() {
     override suspend fun checkIp(request: IpCheckRequest): IpCheckReply {
         val check = CompletableDeferred<String>()
         val uuid = UUID.fromString(request.uuid)
-        checkIpMap[uuid] = check
-        StaffOG.scope.launch {
-            delay(Duration.ofMinutes(1))
-            check.cancel()
-            checkIpMap.remove(uuid)
-        }
+        // A newer check replaces an older one, which fails at once
+        checkIpMap.put(uuid, check)?.cancel()
         val ip = try {
-             check.await()
+            withTimeout(Duration.ofMinutes(1)) { check.await() }
         } catch (_: CancellationException) {
+            // Propagate if the caller itself went away
+            currentCoroutineContext().ensureActive()
+            // Timed out or replaced by a newer check
             throw StatusException(Status.DEADLINE_EXCEEDED)
+        } finally {
+            // Remove only this check's own entry
+            checkIpMap.remove(uuid, check)
+            // A late login must not answer a finished check
+            check.cancel()
         }
-
-        checkIpMap.remove(uuid)
 
         return ipCheckReply {
             this.ip = ip

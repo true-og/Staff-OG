@@ -10,8 +10,10 @@ class Events : Listener {
     @EventHandler
     fun onPlayerPreLogin(event: AsyncPlayerPreLoginEvent) {
         IpCheckEndpoint.checkIpMap[event.playerProfile.id]?.let {
-            it.complete(event.address.hostAddress)
-            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Component.text("IP sent to Staff-Auth"))
+            // Kick only if this login answered a pending check
+            if (it.complete(event.address.hostAddress)) {
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, Component.text("IP sent to Staff-Auth"))
+            }
         }
     }
 }
